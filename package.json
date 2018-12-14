@@ -1,0 +1,14 @@
+{
+  "name": "ts-rpc",
+  "version": "0.0.1",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "purify-ts": "^0.12.2"
+  },
+  "devDependencies": {
+    "@types/node": "^11.9.3",
+    "typescript": "^3.3.3"
+  }
+}
