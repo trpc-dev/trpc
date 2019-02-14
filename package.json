@@ -1,8 +1,10 @@
 {
-  "name": "ts-rpc",
+  "name": "@ts-rpc/core",
   "version": "0.0.1",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "author": "Frank Paulo Filho",
+  "license": "ISC",
   "dependencies": {
     "axios": "^0.18.0",
     "purify-ts": "^0.12.2"
