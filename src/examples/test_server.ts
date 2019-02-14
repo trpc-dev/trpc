@@ -1,20 +1,17 @@
 import {createServer} from '../server'
 import {Point, PointService, DistResponse} from './service'
-import {ValidateClass, AssertType} from 'typescript-is'
 
-
-@ValidateClass()
 class PointServiceImpl1 implements PointService {
-	async dist(@AssertType() p1: Point, @AssertType() p2: Point): Promise<DistResponse> {
+	async dist(p1: Point, p2: Point): Promise<DistResponse> {
 		const diffX = Math.pow(p1.x - p2.x, 2)
 		const diffY = Math.pow(p1.y - p2.y, 2)
-		return { ok: true, value: Math.sqrt(diffX + diffY) } 
+		return {ok: true, value: Math.sqrt(diffX + diffY)}
 	}
 
 	async dist2(p1: Point, p2: Point): Promise<DistResponse> {
 		const diffX = Math.pow(p1.x - p2.x, 2)
 		const diffY = Math.pow(p1.y - p2.y, 2)
-		return { ok: true, value: Math.sqrt(diffX + diffY) } 
+		return {ok: true, value: Math.sqrt(diffX + diffY)}
 	}
 }
 
