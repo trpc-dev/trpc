@@ -1,5 +1,5 @@
 import axios from 'axios'
-import {left, right} from './result'
+import {err, ok} from './result'
 
 type RpcRequest<A, Fn extends keyof A> = {
 	fn: Fn
@@ -45,9 +45,9 @@ export function createClient<A>(remoteAddr: string): A {
 					return handleRequest(remoteAddr + '/', req).then(
 						(data: any) => {
 							if (data.ok) {
-								return right(data.value)
+								return ok(data.value)
 							} else {
-								return left(data.error)
+								return err(data.error)
 							}
 						},
 					)
