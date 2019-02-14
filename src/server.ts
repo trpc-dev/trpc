@@ -87,7 +87,7 @@ const rpcHandler = <A>(service: A, debugMode: boolean) =>
 type CreateServerOptions = {debugMode?: boolean}
 export function createServer<A>(
 	service: A,
-	{debugMode = false}: CreateServerOptions,
+	{debugMode = false}: CreateServerOptions = {},
 ): http.Server {
 	const server = http.createServer(rpcHandler(service, debugMode))
 
