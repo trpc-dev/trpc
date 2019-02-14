@@ -1,5 +1,5 @@
 import axios from 'axios'
-import {left, right} from './types'
+import {left, right} from './result'
 
 type RpcRequest<A, Fn extends keyof A> = {
 	fn: Fn

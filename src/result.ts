@@ -3,7 +3,7 @@ import * as purify from 'purify-ts/Either'
 export type Result<T, E = never> = purify.Either<E, T>
 
 export type AsyncResult<T, E = never> = Promise<
-	purify.Either<T, 'InvalidInput' | 'ServerError' | E>
+	purify.Either<'InvalidInput' | 'ServerError' | E, T>
 >
 
 export function left<E extends string, T = never>(value: E): Result<T, E>
