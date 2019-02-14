@@ -1,8 +1,13 @@
 import * as http from 'http'
 
-function error(req: http.IncomingMessage, res: http.ServerResponse) {
+function error(req: http.IncomingMessage, res: http.ServerResponse, err?: any) {
 	res.statusCode = 400
-	res.end(JSON.stringify({ok: false, error: 'InvalidInput'}))
+
+	if (err instanceof TypeError) {
+		res.end(JSON.stringify({ok: false, error: 'InvalidInput'}))
+	} else {
+		res.end(JSON.stringify({ok: false, error: 'ServerError'}))
+	}
 	req.connection.destroy()
 	return
 }
@@ -63,12 +68,12 @@ const rpcHandler = <A>(service: A) =>
 					.catch((err: any) => {
 						console.error('Service function error')
 						console.error(err)
-						error(req, res)
+						error(req, res, err)
 					})
 			} catch (err) {
 				console.error('Error while parsing JSON')
 				console.error(err)
-				return error(req, res)
+				return error(req, res, err)
 			}
 		})
 	}
