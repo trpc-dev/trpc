@@ -19,7 +19,7 @@ function invalid(req: http.IncomingMessage, res: http.ServerResponse) {
 	return
 }
 
-const rpcHandler = <A>(service: A) =>
+const rpcHandler = <A>(service: A, debugMode: boolean) =>
 	function handler(req: http.IncomingMessage, res: http.ServerResponse) {
 		const tsRpcVersion = req.headers['x-ts-rpc-version']
 		const contentType = req.headers['content-type']
@@ -53,7 +53,9 @@ const rpcHandler = <A>(service: A) =>
 			try {
 				const body = Buffer.concat(bufs, byteSize).toString('utf8')
 				const {fn, args} = JSON.parse(body) as any
-				console.log(`[+] ${fn}:`, args)
+				if (debugMode) {
+					console.log(`[+] ${fn}:`, args)
+				}
 				;(service as any)
 					[fn](...args)
 					.then((answer: any) => {
@@ -66,20 +68,28 @@ const rpcHandler = <A>(service: A) =>
 						res.end(JSON.stringify(json))
 					})
 					.catch((err: any) => {
-						console.error('Service function error')
-						console.error(err)
+						if (debugMode) {
+							console.error('Service function error')
+							console.error(err)
+						}
 						error(req, res, err)
 					})
 			} catch (err) {
-				console.error('Error while parsing JSON')
-				console.error(err)
+				if (debugMode) {
+					console.error('Error while parsing JSON')
+					console.error(err)
+				}
 				return error(req, res, err)
 			}
 		})
 	}
 
-export function createServer<A>(service: A): http.Server {
-	const server = http.createServer(rpcHandler(service))
+type CreateServerOptions = {debugMode?: boolean}
+export function createServer<A>(
+	service: A,
+	{debugMode = false}: CreateServerOptions,
+): http.Server {
+	const server = http.createServer(rpcHandler(service, debugMode))
 
 	return server
 }
