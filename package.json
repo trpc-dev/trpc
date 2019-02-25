@@ -1,12 +1,13 @@
 {
   "name": "@frankpf/ts-rpc",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "author": "Frank Paulo Filho",
   "license": "ISC",
   "dependencies": {
     "axios": "^0.18.0",
+    "fp-ts": "^1.14.2",
     "purify-ts": "^0.12.2"
   },
   "devDependencies": {
