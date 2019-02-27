@@ -1,4 +1,23 @@
 import * as http from 'http'
+import {Hook, AfterHook} from './hooks'
+import {debugHook} from './hooks/debug'
+
+function runHooks(
+	req: http.IncomingMessage,
+	res: http.ServerResponse,
+	hooks: Hook[],
+): AfterHook[] {
+	const afterHooks = [] as AfterHook[]
+	for (const hook of hooks) {
+		afterHooks.push(
+			hook({
+				req,
+				res,
+			}),
+		)
+	}
+	return afterHooks
+}
 
 function error(req: http.IncomingMessage, res: http.ServerResponse, err?: any) {
 	res.statusCode = 400
@@ -19,7 +38,7 @@ function invalid(req: http.IncomingMessage, res: http.ServerResponse) {
 	return
 }
 
-const rpcHandler = <A>(service: A, debugMode: boolean) =>
+const rpcHandler = <A>(service: A, debugMode: boolean, hooks: Hook[]) =>
 	function handler(req: http.IncomingMessage, res: http.ServerResponse) {
 		const tsRpcVersion = req.headers['x-ts-rpc-version']
 		const contentType = req.headers['content-type']
@@ -51,21 +70,16 @@ const rpcHandler = <A>(service: A, debugMode: boolean) =>
 
 		req.on('end', function() {
 			try {
-				const body = Buffer.concat(bufs, byteSize).toString('utf8')
-				const {fn, args} = JSON.parse(body) as any
-				if (debugMode) {
-					console.log(`[+] ${fn}:`, args)
-				}
+				const bodyString = Buffer.concat(bufs, byteSize).toString(
+					'utf8',
+				)
+				const body = JSON.parse(bodyString)
+				const {fn, args} = body
+				const afterHooks = runHooks(req, res, hooks)
 				;(service as any)
 					[fn](...args)
 					.then((answer: any) => {
-						let json
-						if (answer.isRight()) {
-							json = {ok: true, value: answer.extract()}
-						} else {
-							json = {ok: false, error: answer.extract()}
-						}
-						res.end(JSON.stringify(json))
+						res.end(JSON.stringify(answer))
 					})
 					.catch((err: any) => {
 						if (debugMode) {
@@ -73,6 +87,9 @@ const rpcHandler = <A>(service: A, debugMode: boolean) =>
 							console.error(err)
 						}
 						error(req, res, err)
+					})
+					.then(() => {
+						afterHooks.forEach(hook => hook({req, res}))
 					})
 			} catch (err) {
 				if (debugMode) {
@@ -84,12 +101,12 @@ const rpcHandler = <A>(service: A, debugMode: boolean) =>
 		})
 	}
 
-type CreateServerOptions = {debugMode?: boolean}
+type CreateServerOptions = {debugMode?: boolean; hooks?: Hook[]}
 export function createServer<A>(
 	service: A,
-	{debugMode = false}: CreateServerOptions = {},
+	{debugMode = false, hooks = [debugHook]}: CreateServerOptions = {},
 ): http.Server {
-	const server = http.createServer(rpcHandler(service, debugMode))
+	const server = http.createServer(rpcHandler(service, debugMode, hooks))
 
 	return server
 }
