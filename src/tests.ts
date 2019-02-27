@@ -1,8 +1,8 @@
 import {FpTsDecoder} from './decoders/fp-ts'
 import {PurifyDecoder} from './decoders/purify'
-import {IdentityDecoder} from './decoders/identity'
+import {DefaultDecoder} from './decoders/default'
 import {DecoderUris} from './converters'
-import {WithDecoder, WithDecoder2} from './converters/decoder'
+import {WithDecoder} from './converters/decoder'
 import {ServiceDef} from './types'
 
 export type DefaultErrors = 'ServerError' | 'InvalidInput'
@@ -23,7 +23,7 @@ export const service: UserService = {
 function createClient<Service extends ServiceDef<Service>>(uri: string) {
 	return function<Name extends DecoderUris>(decoder: {
 		readonly uri: Name
-	}): WithDecoder2<Service, Name> {
+	}): WithDecoder<Service, Name> {
 		return 1 as any
 	}
 }
@@ -35,21 +35,21 @@ async function main() {
 	const c2 = c1(new FpTsDecoder())
 	const x1 = await c2.createUser('a', 'b')
 	x1._tag
-	x1.__value
-	x1.ok
+	// x1.__value
+	// x1.ok
 
 	// purify-ts
 	const c3 = c1(new PurifyDecoder())
 	const x2 = await c3.createUser('a', 'b')
-	x2._tag
+	// x2._tag
 	x2.__value
-	x2.ok
+	// x2.ok
 
 	// identity
-	const c4 = c1(new IdentityDecoder())
+	const c4 = c1(new DefaultDecoder())
 	const x3 = await c4.createUser('a', 'b')
-	x3._tag
-	x3.__value
+	// x3._tag
+	// x3.__value
 	x3.ok
 }
 
