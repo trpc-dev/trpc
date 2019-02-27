@@ -27,6 +27,7 @@
 		},
 	},
 	"include": [
+		"examples/**/*", // FIXME: Remove this
 		"src/**/*",
 		"tests/**/*"
 	]
