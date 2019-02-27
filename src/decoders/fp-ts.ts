@@ -4,6 +4,7 @@ import {Decoder} from '../converters/decoder'
 
 const URI = 'ts-rpc/decoders/fp-ts'
 type URI = typeof URI
+
 export class FpTsDecoder<T, E> implements Decoder<T, E, Either<E, T>, URI> {
 	readonly uri = URI
 	decode(r: Result<T, E>): Either<E, T> {
