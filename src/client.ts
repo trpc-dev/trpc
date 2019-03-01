@@ -1,5 +1,8 @@
 import axios from 'axios'
 import {err, ok} from './result'
+import {ServiceDef} from './types'
+import {DecoderUris} from './converters'
+import {Decoder} from './converters/decoder'
 
 type RpcRequest<A, Fn extends keyof A> = {
 	fn: Fn
@@ -32,29 +35,33 @@ async function handleRequest<A, Fn extends keyof A>(
 	return data
 }
 
-export function createClient<A>(remoteAddr: string): A {
-	const proxy = new Proxy(
-		{},
-		{
-			get: function(obj, prop, receiver) {
-				return (...args: any[]) => {
-					const req = {
-						fn: prop,
-						args: args,
-					} as any
-					return handleRequest(remoteAddr + '/', req).then(
-						(data: any) => {
-							if (data.ok) {
-								return ok(data.value)
-							} else {
-								return err(data.error)
-							}
-						},
-					)
+type CreateClientOptions<T, E, O, Name extends DecoderUris> = {
+	address: string
+	decoder?: Decoder<T, E, O, Name>
+}
+export function createClient<
+	A extends ServiceDef<A>,
+	T = never,
+	E = never,
+	O = never,
+	Name extends DecoderUris = never
+>({address, decoder}: CreateClientOptions<T, E, O, Name>): A {
+	const proxy = new Proxy<A>({} as A, {
+		get(obj, prop, receiver) {
+			return async (...args: any[]) => {
+				const req = {
+					fn: prop,
+					args: args,
+				} as any
+				const result = (await handleRequest(address + '/', req)) as any
+				if (result.ok) {
+					return ok(result.value)
+				} else {
+					return err(result.error)
 				}
-			},
+			}
 		},
-	)
+	})
 
-	return proxy as A
+	return proxy
 }

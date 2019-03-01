@@ -101,9 +101,10 @@ const rpcHandler = <A>(service: A, debugMode: boolean, hooks: Hook[]) =>
 		})
 	}
 
+export type NoInfer<T> = T & { [K in keyof T]: T[K] };
 type CreateServerOptions = {debugMode?: boolean; hooks?: Hook[]}
 export function createServer<A>(
-	service: A,
+	service: NoInfer<A>,
 	{debugMode = false, hooks = [debugHook]}: CreateServerOptions = {},
 ): http.Server {
 	const server = http.createServer(rpcHandler(service, debugMode, hooks))

@@ -20,7 +20,7 @@ export const service: UserService = {
 	},
 }
 
-function createClient<Service extends ServiceDef<Service>>(uri: string) {
+export function createClient<Service extends ServiceDef<Service>>(uri: string) {
 	return function<Name extends DecoderUris>(decoder: {
 		readonly uri: Name
 	}): WithDecoder<Service, Name> {
