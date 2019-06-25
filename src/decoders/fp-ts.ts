@@ -2,11 +2,9 @@ import {Either, left, right} from 'fp-ts/lib/Either'
 import {Result} from '../result'
 import {Decoder} from '../converters/decoder'
 
-const URI = 'ts-rpc/decoders/fp-ts'
-type URI = typeof URI
-
-export class FpTsDecoder<T, E> implements Decoder<T, E, Either<E, T>, URI> {
-	readonly uri = URI
+export class FpTsDecoder<T, E>
+	implements Decoder<T, E, Either<E, T>, FpTsDecoder.Uri> {
+	readonly uri = FpTsDecoder.Uri
 	decode(r: Result<T, E>): Either<E, T> {
 		if (r.ok) {
 			return right(r.value)
@@ -16,8 +14,13 @@ export class FpTsDecoder<T, E> implements Decoder<T, E, Either<E, T>, URI> {
 	}
 }
 
+export namespace FpTsDecoder {
+	export const Uri = 'ts-rpc/decoders/fp-ts'
+	export type Uri = typeof Uri
+}
+
 declare module '../converters' {
 	interface Decoders<T, E> {
-		'ts-rpc/decoders/fp-ts': FpTsDecoder<T, E>
+		[FpTsDecoder.Uri]: FpTsDecoder<T, E>
 	}
 }

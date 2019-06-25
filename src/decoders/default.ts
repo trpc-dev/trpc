@@ -1,14 +1,17 @@
 import {Decoder} from '../converters/decoder'
 import {Result} from '../result'
 
-const URI = 'ts-rpc/decoders/default'
-type URI = typeof URI
-
-export class DefaultDecoder<T, E> implements Decoder<T, E, Result<T, E>, URI> {
-	readonly uri = URI
+export class DefaultDecoder<T, E>
+	implements Decoder<T, E, Result<T, E>, DefaultDecoder.URI> {
+	readonly uri = DefaultDecoder.URI
 	decode(r: Result<T, E>): Result<T, E> {
 		return r
 	}
+}
+
+export namespace DefaultDecoder {
+	export const URI = 'ts-rpc/decoders/default'
+	export type URI = typeof URI
 }
 
 declare module '../converters' {

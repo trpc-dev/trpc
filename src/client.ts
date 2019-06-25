@@ -1,67 +1,70 @@
-import axios from 'axios'
-import {err, ok} from './result'
 import {ServiceDef} from './types'
+import {DefaultDecoder} from './decoders/default'
+import {WithDecoder, Decoder} from './converters/decoder'
 import {DecoderUris} from './converters'
-import {Decoder} from './converters/decoder'
+import axios from 'axios'
 
-type RpcRequest<A, Fn extends keyof A> = {
-	fn: Fn
-	args: ExtractArgs<A[Fn]>
-}
-
-type ExtractArgs<T> = T extends (...args: infer A) => any ? A : never
-
-const client = axios.create({
+const httpClient = axios.create({
 	validateStatus: _ => true,
 })
 
-async function handleRequest<A, Fn extends keyof A>(
-	endpoint: string,
-	request: RpcRequest<A, Fn>,
-): Promise<A[Fn]> {
-	const {data} = await client.post(
-		endpoint,
-		{
-			fn: request.fn,
-			args: request.args,
-		},
-		{
-			headers: {
-				'content-type': 'application/ts-rpc',
-				'x-ts-rpc-version': 1,
-			},
-		},
-	)
-	return data
+export function createClient<S extends ServiceDef<S>>(address: string) {
+	return new ClientBuilder<S>(address)
 }
 
-type CreateClientOptions<T, E, O, Name extends DecoderUris> = {
-	address: string
-	decoder?: Decoder<T, E, O, Name>
-}
-export function createClient<
-	A extends ServiceDef<A>,
-	T = never,
-	E = never,
-	O = never,
-	Name extends DecoderUris = never
->({address, decoder}: CreateClientOptions<T, E, O, Name>): A {
-	const proxy = new Proxy<A>({} as A, {
-		get(obj, prop, receiver) {
-			return async (...args: any[]) => {
-				const req = {
-					fn: prop,
-					args: args,
-				} as any
-				const result = (await handleRequest(address + '/', req)) as any
-				if (result.ok) {
-					return ok(result.value)
-				} else {
-					return err(result.error)
+class ClientBuilder<
+	S extends ServiceDef<S>,
+	DecoderUri extends DecoderUris = DefaultDecoder.URI
+> {
+	decoder: Decoder<any, any, any, any> = new DefaultDecoder()
+
+	constructor(private readonly address: string) {}
+
+	withDecoder<T, E, O, Name extends DecoderUris>(
+		decoder: Decoder<T, E, O, Name>,
+	): ClientBuilder<S, Name> {
+		console.log('decoder with', decoder)
+		this.decoder = decoder
+		return this as any
+	}
+
+	withTransport(): ClientBuilder<S, DecoderUri> {
+		return 1 as any
+	}
+
+	build(): WithDecoder<S, DecoderUri> {
+		const stack = [] as string[]
+		const proxy = new Proxy(new Function(), {
+			get: (target: any, prop: string, receiver: any) => {
+				stack.push(prop)
+				return proxy
+			},
+			apply: async (target: any, thisArg: any, args: any[]) => {
+				const request = {
+					stack,
+					args,
 				}
-			}
+				const result = await makeRequest(this.address, request)
+				return this.decoder.decode(result)
+			},
+		}) as any
+		return proxy
+	}
+}
+
+async function makeRequest<T = any>(
+	endpoint: string,
+	request: {
+		args: any[]
+		stack: string[]
+	},
+): Promise<T> {
+	const url = endpoint + '/' + request.stack.join('.')
+	const {data} = await httpClient.post(url, request, {
+		headers: {
+			'content-type': 'application/ts-rpc',
+			'x-ts-rpc-version': 1,
 		},
 	})
-
-	return proxy
+	return data
 }
