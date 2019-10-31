@@ -6,7 +6,7 @@
   "author": "Frank Paulo Filho",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.18.0",
+    "axios": "^0.18.1",
     "fp-ts": "^1.14.2",
     "purify-ts": "^0.12.2"
   },
