@@ -1,6 +1,6 @@
 {
   "name": "@trpc.dev/trpc",
-  "version": "0.0.18",
+  "version": "0.0.20",
   "main": "lib/src/index.js",
   "types": "lib/src/index.d.ts",
   "author": "Frank Paulo Filho",

@@ -62,8 +62,8 @@ async function makeRequest<T = any>(
 	const url = endpoint + '/' + request.stack.join('.')
 	const {data} = await httpClient.post(url, request, {
 		headers: {
-			'content-type': 'application/ts-rpc',
-			'x-ts-rpc-version': 1,
+			'content-type': 'application/trpc',
+			'x-trpc-version': 1,
 		},
 	})
 	return data

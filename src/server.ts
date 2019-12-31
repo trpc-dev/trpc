@@ -1,6 +1,6 @@
 import * as http from 'http'
 import {Hook, AfterHook} from './hooks'
-import {debugHook} from './hooks/debug'
+import {logHook} from './hooks/debug'
 
 function runHooks(
 	req: http.IncomingMessage,
@@ -64,11 +64,11 @@ const rpcHandler = <A>(service: A, debugMode: boolean, hooks: Hook[]) =>
 		req: http.IncomingMessage & {body: any},
 		res: http.ServerResponse,
 	) {
-		const tsRpcVersion = req.headers['x-ts-rpc-version']
+		const trpcVersion = req.headers['x-trpc-version']
 		const contentType = req.headers['content-type']
 		if (
-			tsRpcVersion !== '1' ||
-			contentType !== 'application/ts-rpc' ||
+			trpcVersion !== '1' ||
+			contentType !== 'application/trpc' ||
 			req.method !== 'POST'
 		) {
 			return invalid(req, res)
@@ -146,7 +146,7 @@ function isExposed(target: any, fn: Function) {
 type CreateServerOptions = {debugMode?: boolean; hooks?: Hook[]}
 export function createServer<S>(
 	service: S,
-	{debugMode = false, hooks = [debugHook]}: CreateServerOptions = {},
+	{debugMode = false, hooks = [logHook]}: CreateServerOptions = {},
 ): http.Server {
 	const server = http.createServer(rpcHandler(service, debugMode, hooks))
 

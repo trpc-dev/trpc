@@ -2,7 +2,7 @@ import {Hook} from './index'
 import Hri = require('human-readable-ids')
 const {hri} = Hri
 
-export const debugHook: Hook = ctx => {
+export const logHook: Hook = ctx => {
 	const start = new Date().getTime()
 	let fnCall = ctx.req as any
 	fnCall = fnCall.body.stack.join('.')
