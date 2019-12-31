@@ -25,12 +25,12 @@ export type WithDecoder<
 					>[Name]['decode']
 				>
 		  >
-		: (Service[K] extends ServiceDef<Service[K]>
-				? WithDecoder<Service[K], Name>
-				: void)
+		: Service[K] extends ServiceDef<Service[K]>
+		? WithDecoder<Service[K], Name>
+		: void
 }
 
 export interface Decoder<T, E, O, Name extends DecoderUris> {
-	readonly uri: Name
+	readonly uid: Name
 	decode(result: Result<T, E>): O
 }

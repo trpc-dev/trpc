@@ -1,10 +1,13 @@
 import {createClient} from '../../src/client'
 import {PointService} from './service'
+import {DefaultDecoder} from '../../src/decoders'
 
 async function main() {
 	const client = createClient<PointService>('http://localhost:3000')
+		.withDecoder(new DefaultDecoder())
+		.build()
 
-	const res = await client.dist({ x: 3, y: 1}, {x:2, y: 2})
+	const res = await client.dist({x: 3, y: 1}, {x: 2, y: 2})
 
 	if (res.ok) {
 		console.log('OK: ', res.value)

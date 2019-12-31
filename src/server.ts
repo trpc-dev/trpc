@@ -99,7 +99,7 @@ const rpcHandler = <A>(service: A, debugMode: boolean, hooks: Hook[]) =>
 			for (let i = 1; i < stack.length; i++) {
 				fn = fn[stack[i]]
 			}
-			if (!fn.isExposed) {
+			if (!isExposed(service, fn)) {
 				return error({
 					req,
 					res,
@@ -126,12 +126,21 @@ const rpcHandler = <A>(service: A, debugMode: boolean, hooks: Hook[]) =>
 		}
 	}
 
+const EXPOSED_METHODS_SYMBOL = Symbol('exposedMethods')
+
 export function expose(
 	target: any,
 	key: string,
 	descriptor: PropertyDescriptor,
 ): void {
-	target[key].isExposed = true
+	if (target[EXPOSED_METHODS_SYMBOL] === undefined) {
+		target[EXPOSED_METHODS_SYMBOL] = new Set()
+	}
+	target[EXPOSED_METHODS_SYMBOL].add(key)
+}
+
+function isExposed(target: any, fn: Function) {
+	return target[EXPOSED_METHODS_SYMBOL].has(fn.name)
 }
 
 type CreateServerOptions = {debugMode?: boolean; hooks?: Hook[]}

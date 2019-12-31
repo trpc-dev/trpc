@@ -1,21 +1,20 @@
 {
   "name": "@frankpf/ts-rpc",
-  "version": "0.0.8",
+  "version": "0.0.15",
   "main": "lib/src/index.js",
   "types": "lib/src/index.d.ts",
   "author": "Frank Paulo Filho",
   "license": "ISC",
   "dependencies": {
     "axios": "^0.18.0",
-    "benchmark": "^2.1.4",
     "fp-ts": "^1.14.2",
     "human-readable-ids": "^1.0.4",
     "purify-ts": "^0.12.2",
     "uuid": "^3.3.2"
   },
   "devDependencies": {
-    "@types/node": "^11.9.3",
+    "@types/node": "^13.1.2",
     "@types/uuid": "^3.4.4",
-    "typescript": "^3.3.3"
+    "typescript": "^3.8.0-dev.20191228"
   }
 }

@@ -3,8 +3,8 @@ import {Result} from '../result'
 import {Decoder} from '../converters/decoder'
 
 export class FpTsDecoder<T, E>
-	implements Decoder<T, E, Either<E, T>, FpTsDecoder.Uri> {
-	readonly uri = FpTsDecoder.Uri
+	implements Decoder<T, E, Either<E, T>, FpTsDecoder.Uid> {
+	readonly uid!: FpTsDecoder.Uid
 	decode(r: Result<T, E>): Either<E, T> {
 		if (r.ok) {
 			return right(r.value)
@@ -15,12 +15,12 @@ export class FpTsDecoder<T, E>
 }
 
 export namespace FpTsDecoder {
-	export const Uri = 'ts-rpc/decoders/fp-ts'
-	export type Uri = typeof Uri
+	export const Uid = Symbol('trpc/decoders/fp-ts')
+	export type Uid = typeof Uid
 }
 
 declare module '../converters' {
 	interface Decoders<T, E> {
-		[FpTsDecoder.Uri]: FpTsDecoder<T, E>
+		[FpTsDecoder.Uid]: FpTsDecoder<T, E>
 	}
 }

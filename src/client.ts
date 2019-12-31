@@ -14,7 +14,7 @@ export function createClient<S extends ServiceDef<S>>(address: string) {
 
 class ClientBuilder<
 	S extends ServiceDef<S>,
-	DecoderUri extends DecoderUris = DefaultDecoder.URI
+	DecoderUri extends DecoderUris = DefaultDecoder.Uid
 > {
 	decoder: Decoder<any, any, any, any> = new DefaultDecoder()
 
@@ -23,14 +23,14 @@ class ClientBuilder<
 	withDecoder<T, E, O, Name extends DecoderUris>(
 		decoder: Decoder<T, E, O, Name>,
 	): ClientBuilder<S, Name> {
-		console.log('decoder with', decoder)
 		this.decoder = decoder
 		return this as any
 	}
 
+	/*
 	withTransport(): ClientBuilder<S, DecoderUri> {
-		return 1 as any
 	}
+	*/
 
 	build(): WithDecoder<S, DecoderUri> {
 		const stack = [] as string[]
