@@ -1,5 +1,5 @@
 {
-  "name": "@frankpf/ts-rpc",
+  "name": "@trpc.dev/trpc",
   "version": "0.0.18",
   "main": "lib/src/index.js",
   "types": "lib/src/index.d.ts",
