@@ -1,20 +1,21 @@
 import * as http from 'http'
-import {Hook, AfterHook} from './hooks'
+import {Hook, AfterHook, HookResponse} from './hooks'
 import {logHook} from './hooks/log'
 
 function runHooks(
 	req: http.IncomingMessage,
 	res: http.ServerResponse,
 	hooks: Hook[],
-): AfterHook[] {
+): AfterHook[] | HookResponse {
 	const afterHooks = [] as AfterHook[]
 	for (const hook of hooks) {
-		afterHooks.push(
-			hook({
-				req,
-				res,
-			}),
-		)
+		const hookResult = hook({req, res})
+		if (hookResult instanceof HookResponse) {
+			return hookResult
+		}
+		if (typeof hookResult === 'function') {
+			afterHooks.push(hookResult)
+		}
 	}
 	return afterHooks
 }
@@ -93,7 +94,11 @@ const rpcHandler = <A>(service: A, debugMode: boolean, hooks: Hook[]) =>
 			const body = JSON.parse(bodyString)
 			req.body = body
 			const {stack, args} = body
-			const afterHooks = runHooks(req, res, hooks)
+			const afterHooksOrResponse = runHooks(req, res, hooks)
+			if (afterHooksOrResponse instanceof HookResponse) {
+				res.end(afterHooksOrResponse.body)
+				return
+			}
 
 			let fn = (service as any)[stack[0]]
 			for (let i = 1; i < stack.length; i++) {
@@ -114,7 +119,7 @@ const rpcHandler = <A>(service: A, debugMode: boolean, hooks: Hook[]) =>
 			})
 			res.end(JSON.stringify(answer))
 
-			afterHooks.forEach(hook => hook({req, res}))
+			afterHooksOrResponse.forEach(hook => hook({req, res}))
 		} catch (err) {
 			return error({
 				req,
