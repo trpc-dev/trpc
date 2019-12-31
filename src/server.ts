@@ -101,16 +101,29 @@ const rpcHandler = <A>(service: A, debugMode: boolean, hooks: Hook[]) =>
 			}
 
 			let fn = (service as any)[stack[0]]
+			let parentObj = service
 			for (let i = 1; i < stack.length; i++) {
+				parentObj = fn
 				fn = fn[stack[i]]
 			}
-			if (!isExposed(service, fn)) {
+			if (fn === undefined) {
 				return error({
 					req,
 					res,
 					err: undefined,
 					debugMode,
-					msg: `Function ${stack.join('.')} is not defined`,
+					msg: `Function ${stack.join('.')} is not defined.`,
+				})
+			}
+			if (!isExposed(parentObj, stack)) {
+				return error({
+					req,
+					res,
+					err: undefined,
+					debugMode,
+					msg: `Function ${stack.join(
+						'.',
+					)} is not exposed. Did you remember to decorate it with @expose?`,
 				})
 			}
 
@@ -144,8 +157,13 @@ export function expose(
 	target[EXPOSED_METHODS_SYMBOL].add(key)
 }
 
-function isExposed(target: any, fn: Function) {
-	return target[EXPOSED_METHODS_SYMBOL].has(fn.name)
+function isExposed(target: any, stack: string[]) {
+	const methodName = stack[stack.length - 1]
+	const exposedMethods = target[EXPOSED_METHODS_SYMBOL]
+	if (exposedMethods === undefined) {
+		return false
+	}
+	return exposedMethods.has(methodName)
 }
 
 type CreateServerOptions = {debugMode?: boolean; hooks?: Hook[]}
