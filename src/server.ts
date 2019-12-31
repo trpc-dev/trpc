@@ -1,6 +1,6 @@
 import * as http from 'http'
 import {Hook, AfterHook} from './hooks'
-import {logHook} from './hooks/debug'
+import {logHook} from './hooks/log'
 
 function runHooks(
 	req: http.IncomingMessage,
